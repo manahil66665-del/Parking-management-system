@@ -1,0 +1,72 @@
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE IF NOT EXISTS roles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    description TEXT
+);
+
+CREATE TABLE IF NOT EXISTS app_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    full_name TEXT NOT NULL,
+    role_id INTEGER NOT NULL,
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(role_id) REFERENCES roles(id)
+);
+
+CREATE TABLE IF NOT EXISTS cars (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    registration_no TEXT NOT NULL UNIQUE,
+    owner_name TEXT NOT NULL,
+    model TEXT NOT NULL,
+    car_type TEXT NOT NULL DEFAULT 'OTHER',
+    color TEXT,
+    status TEXT NOT NULL DEFAULT 'ACTIVE',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS slots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    slot_code TEXT NOT NULL UNIQUE,
+    floor TEXT NOT NULL,
+    type TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'AVAILABLE',
+    car_id INTEGER,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(car_id) REFERENCES cars(id)
+);
+
+CREATE TABLE IF NOT EXISTS bookings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    car_id INTEGER NOT NULL,
+    slot_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    start_time TEXT NOT NULL,
+    end_time TEXT,
+    status TEXT NOT NULL DEFAULT 'ACTIVE',
+    FOREIGN KEY(car_id) REFERENCES cars(id),
+    FOREIGN KEY(slot_id) REFERENCES slots(id),
+    FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS bills (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    invoice_no TEXT NOT NULL UNIQUE,
+    car_id INTEGER NOT NULL,
+    booking_id INTEGER,
+    amount REAL NOT NULL,
+    status TEXT NOT NULL DEFAULT 'UNPAID',
+    issued_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    paid_at TEXT,
+    notes TEXT,
+    FOREIGN KEY(car_id) REFERENCES cars(id),
+    FOREIGN KEY(booking_id) REFERENCES bookings(id)
+);

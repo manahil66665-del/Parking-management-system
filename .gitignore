@@ -1,8 +1,6 @@
-node_modules
-.env
-dist
-build
-.idea/
 out/
 *.class
-*.iml
+parking_management.db
+*.db-journal
+lib/*.jar
+!lib/README.md
