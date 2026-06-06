@@ -62,6 +62,8 @@ CREATE TABLE IF NOT EXISTS bills (
     invoice_no TEXT NOT NULL UNIQUE,
     car_id INTEGER NOT NULL,
     booking_id INTEGER,
+    daily_rate REAL NOT NULL DEFAULT 0,
+    billed_days INTEGER NOT NULL DEFAULT 1,
     amount REAL NOT NULL,
     status TEXT NOT NULL DEFAULT 'UNPAID',
     issued_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,

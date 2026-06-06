@@ -53,6 +53,8 @@ classDiagram
         int id
         String invoiceNo
         Car car
+        double dailyRate
+        int billedDays
         double amount
         String status
         String issuedAt
@@ -132,19 +134,22 @@ if (occupiedSlot != null) {
 }
 ```
 
-### Billing Creation And CRUD
+### Standardized Billing Creation And CRUD
 
 ```java
-double amount = Double.parseDouble(amountField.getText().trim());
-billingService.createBill(carId, amount, notesField.getText().trim());
+int billedDays = (Integer) daysSpinner.getValue();
+billingService.createBill(carId, billedDays, notesField.getText().trim());
 ```
 
-`BillingService` validates the amount before saving:
+`BillingService` calculates the amount from the car type:
 
 ```java
-ValidationUtil.requirePositive(amount, "Amount");
-return billDao.create(carId, amount, notes);
+double dailyRate = dailyRateFor(car.getCarType());
+double amount = dailyRate * Math.max(1, billedDays);
+return billDao.create(carId, dailyRate, billedDays, amount, notes);
 ```
+
+Default daily rates are `SEDAN = 300`, `JEEP = 400`, `TRUCK = 600`, and `OTHER = 250`.
 
 The billing screen also reads all invoices, marks selected invoices paid, and deletes selected invoices:
 
@@ -174,7 +179,7 @@ The full schema is in `database/schema.sql`. Core tables:
 - `slots`: slot code, floor, type, status, assigned car.
 - `app_settings`: stores seed/migration flags so deleted sample data does not reappear.
 - `bookings`: car, slot, user, start/end time, status.
-- `bills`: invoice number, car, booking, amount, payment status.
+- `bills`: invoice number, car, booking, daily rate, billed days, calculated amount, payment status.
 
 ## Seed Data
 

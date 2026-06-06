@@ -11,7 +11,8 @@ Desktop semester project built with Java OOP, Java Swing, SQLite, JDBC, DAO patt
 - Slot allocation prevents assigning one car to multiple slots.
 - Car information lookup by registration, car type tracking (`SEDAN`, `JEEP`, `TRUCK`, `OTHER`), basic car creation, and admin-only car deletion.
 - Deleting a car also removes its related bills/bookings so old cars do not remain in the Billing tab.
-- Billing screen shows labeled invoice fields, status filter, paid/unpaid totals, owner, registration, and car type.
+- Billing is standardized by car type and days. Rates are `SEDAN = 300`, `JEEP = 400`, `TRUCK = 600`, `OTHER = 250` per day.
+- Billing screen shows rate/day, billed days, calculated total, status filter, paid/unpaid totals, owner, registration, and car type.
 - Slots screen shows availability summary, status filter, assigned car type, and colored status cells.
 - Slots can be added from the Slots tab and deleted when they are empty and available.
 - Sample cars and slots are seeded only for a fresh database and will not reappear after you delete them.

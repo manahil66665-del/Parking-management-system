@@ -17,12 +17,12 @@ import java.util.List;
 public class BillDao {
     public List<Bill> findAll() {
         List<Bill> bills = new ArrayList<>();
-        String sql = "SELECT b.id, b.invoice_no, b.amount, b.status, b.issued_at, b.paid_at, b.notes, "
+        String sql = "SELECT b.id, b.invoice_no, b.daily_rate, b.billed_days, b.amount, b.status, b.issued_at, b.paid_at, b.notes, "
                 + "c.id AS car_id, c.registration_no, c.owner_name, c.model, c.car_type, c.color, c.status AS car_status "
                 + "FROM bills b JOIN cars c ON c.id = b.car_id ORDER BY b.issued_at DESC";
         try (Connection connection = Database.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql);
-                ResultSet resultSet = statement.executeQuery()) {
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 bills.add(mapBill(resultSet));
             }
@@ -32,15 +32,17 @@ public class BillDao {
         return bills;
     }
 
-    public Bill create(int carId, double amount, String notes) {
+    public Bill create(int carId, double dailyRate, int billedDays, double amount, String notes) {
         String invoiceNo = "INV-" + DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS").format(LocalDateTime.now());
-        String sql = "INSERT INTO bills(invoice_no, car_id, amount, notes) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO bills(invoice_no, car_id, daily_rate, billed_days, amount, notes) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection connection = Database.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+             PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setString(1, invoiceNo);
             statement.setInt(2, carId);
-            statement.setDouble(3, amount);
-            statement.setString(4, notes);
+            statement.setDouble(3, dailyRate);
+            statement.setInt(4, billedDays);
+            statement.setDouble(5, amount);
+            statement.setString(6, notes);
             statement.executeUpdate();
             try (ResultSet keys = statement.getGeneratedKeys()) {
                 if (keys.next()) {
@@ -58,7 +60,7 @@ public class BillDao {
     public void markPaid(int billId) {
         String sql = "UPDATE bills SET status = 'PAID', paid_at = ? WHERE id = ?";
         try (Connection connection = Database.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, LocalDateTime.now().toString());
             statement.setInt(2, billId);
             int updated = statement.executeUpdate();
@@ -73,7 +75,7 @@ public class BillDao {
     public void delete(int billId) {
         String sql = "DELETE FROM bills WHERE id = ?";
         try (Connection connection = Database.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, billId);
             int deleted = statement.executeUpdate();
             if (deleted == 0) {
@@ -87,8 +89,8 @@ public class BillDao {
     public double unpaidTotal() {
         String sql = "SELECT COALESCE(SUM(amount), 0) AS total FROM bills WHERE status = 'UNPAID'";
         try (Connection connection = Database.getConnection();
-                PreparedStatement statement = connection.prepareStatement(sql);
-                ResultSet resultSet = statement.executeQuery()) {
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
             return resultSet.next() ? resultSet.getDouble("total") : 0;
         } catch (SQLException exception) {
             throw new IllegalStateException("Unable to calculate unpaid total.", exception);
@@ -100,7 +102,8 @@ public class BillDao {
                 resultSet.getString("owner_name"), resultSet.getString("model"), resultSet.getString("car_type"),
                 resultSet.getString("color"), resultSet.getString("car_status"));
         return new Bill(resultSet.getInt("id"), resultSet.getString("invoice_no"), car,
-                resultSet.getDouble("amount"), resultSet.getString("status"), resultSet.getString("issued_at"),
-                resultSet.getString("paid_at"), resultSet.getString("notes"));
+                resultSet.getDouble("daily_rate"), resultSet.getInt("billed_days"), resultSet.getDouble("amount"),
+                resultSet.getString("status"), resultSet.getString("issued_at"), resultSet.getString("paid_at"),
+                resultSet.getString("notes"));
     }
 }

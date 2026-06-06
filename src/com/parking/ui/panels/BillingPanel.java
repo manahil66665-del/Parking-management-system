@@ -12,8 +12,9 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
-import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -24,8 +25,8 @@ public class BillingPanel extends JPanel {
     private final BillingService billingService = new BillingService();
     private final CarService carService = new CarService();
     private final DefaultTableModel model = new DefaultTableModel(
-            new Object[] { "ID", "Invoice", "Registration", "Owner", "Type", "Amount", "Status", "Issued", "Paid",
-                    "Notes" }, 0) {
+            new Object[] { "ID", "Invoice", "Registration", "Owner", "Type", "Rate/Day", "Days", "Amount", "Status",
+                    "Issued", "Paid", "Notes" }, 0) {
         @Override
         public boolean isCellEditable(int row, int column) {
             return false;
@@ -33,9 +34,11 @@ public class BillingPanel extends JPanel {
     };
     private final JTable table = new JTable(model);
     private final JComboBox<CarItem> carCombo = new JComboBox<>();
-    private final JTextField amountField = new JTextField(8);
-    private final JTextField notesField = new JTextField(18);
+    private final JSpinner daysSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 365, 1));
+    private final javax.swing.JTextField notesField = new javax.swing.JTextField(18);
     private final JComboBox<String> statusFilter = new JComboBox<>(new String[] { "ALL", "UNPAID", "PAID" });
+    private final JLabel rateLabel = Theme.muted("Rate/day: Rs. 0.00");
+    private final JLabel totalLabel = Theme.muted("Total: Rs. 0.00");
     private final JLabel summaryLabel = Theme.muted("No invoices yet.");
 
     public BillingPanel() {
@@ -56,11 +59,15 @@ public class BillingPanel extends JPanel {
         paidButton.addActionListener(event -> markPaid());
         deleteButton.addActionListener(event -> deleteBill());
         refreshButton.addActionListener(event -> refresh());
+        carCombo.addActionListener(event -> updatePreview());
+        daysSpinner.addChangeListener(event -> updatePreview());
         statusFilter.addActionListener(event -> refresh());
         form.add(new JLabel("Car"));
         form.add(carCombo);
-        form.add(new JLabel("Amount"));
-        form.add(amountField);
+        form.add(new JLabel("Days"));
+        form.add(daysSpinner);
+        form.add(rateLabel);
+        form.add(totalLabel);
         form.add(new JLabel("Notes"));
         form.add(notesField);
         form.add(createButton);
@@ -104,12 +111,14 @@ public class BillingPanel extends JPanel {
                 continue;
             }
             model.addRow(new Object[] { bill.getId(), bill.getInvoiceNo(), bill.getCar().getRegistrationNo(),
-                    bill.getCar().getOwnerName(), bill.getCar().getCarType(), String.format("%.2f", bill.getAmount()),
-                    bill.getStatus(), bill.getIssuedAt(), bill.getPaidAt() == null ? "-" : bill.getPaidAt(),
-                    bill.getNotes() == null ? "" : bill.getNotes() });
+                    bill.getCar().getOwnerName(), bill.getCar().getCarType(),
+                    String.format("%.2f", bill.getDailyRate()), bill.getBilledDays(),
+                    String.format("%.2f", bill.getAmount()), bill.getStatus(), bill.getIssuedAt(),
+                    bill.getPaidAt() == null ? "-" : bill.getPaidAt(), bill.getNotes() == null ? "" : bill.getNotes() });
         }
         summaryLabel.setText(String.format("Invoices: %d | Paid: Rs. %.2f | Unpaid: Rs. %.2f", bills.size(),
                 paidTotal, unpaidTotal));
+        updatePreview();
     }
 
     private void createBill() {
@@ -119,18 +128,29 @@ public class BillingPanel extends JPanel {
             return;
         }
         try {
-            double amount = Double.parseDouble(amountField.getText().trim());
-            billingService.createBill(carItem.car.getId(), amount, notesField.getText().trim());
-            amountField.setText("");
+            int billedDays = (Integer) daysSpinner.getValue();
+            billingService.createBill(carItem.car.getId(), billedDays, notesField.getText().trim());
+            daysSpinner.setValue(1);
             notesField.setText("");
             refresh();
             JOptionPane.showMessageDialog(this, "Invoice created successfully.");
-        } catch (NumberFormatException exception) {
-            JOptionPane.showMessageDialog(this, "Amount must be a valid number.", "Validation",
-                    JOptionPane.ERROR_MESSAGE);
         } catch (RuntimeException exception) {
             JOptionPane.showMessageDialog(this, exception.getMessage(), "Billing failed", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void updatePreview() {
+        CarItem carItem = (CarItem) carCombo.getSelectedItem();
+        if (carItem == null) {
+            rateLabel.setText("Rate/day: Rs. 0.00");
+            totalLabel.setText("Total: Rs. 0.00");
+            return;
+        }
+        int billedDays = (Integer) daysSpinner.getValue();
+        double dailyRate = billingService.dailyRateFor(carItem.car.getCarType());
+        double total = billingService.calculateAmount(carItem.car.getCarType(), billedDays);
+        rateLabel.setText(String.format("Rate/day: Rs. %.2f", dailyRate));
+        totalLabel.setText(String.format("Total: Rs. %.2f", total));
     }
 
     private void markPaid() {

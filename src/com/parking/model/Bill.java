@@ -4,6 +4,8 @@ public class Bill {
     private int id;
     private String invoiceNo;
     private Car car;
+    private double dailyRate;
+    private int billedDays;
     private double amount;
     private String status;
     private String issuedAt;
@@ -11,10 +13,17 @@ public class Bill {
     private String notes;
 
     public Bill(int id, String invoiceNo, Car car, double amount, String status, String issuedAt, String paidAt,
-            String notes) {
+                String notes) {
+        this(id, invoiceNo, car, amount, 1, amount, status, issuedAt, paidAt, notes);
+    }
+
+    public Bill(int id, String invoiceNo, Car car, double dailyRate, int billedDays, double amount, String status,
+                String issuedAt, String paidAt, String notes) {
         this.id = id;
         this.invoiceNo = invoiceNo;
         this.car = car;
+        this.dailyRate = dailyRate;
+        this.billedDays = billedDays;
         this.amount = amount;
         this.status = status;
         this.issuedAt = issuedAt;
@@ -32,6 +41,14 @@ public class Bill {
 
     public Car getCar() {
         return car;
+    }
+
+    public double getDailyRate() {
+        return dailyRate;
+    }
+
+    public int getBilledDays() {
+        return billedDays;
     }
 
     public double getAmount() {

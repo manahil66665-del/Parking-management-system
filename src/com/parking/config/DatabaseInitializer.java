@@ -66,6 +66,8 @@ public final class DatabaseInitializer {
                     + "invoice_no TEXT NOT NULL UNIQUE,"
                     + "car_id INTEGER NOT NULL,"
                     + "booking_id INTEGER,"
+                    + "daily_rate REAL NOT NULL DEFAULT 0,"
+                    + "billed_days INTEGER NOT NULL DEFAULT 1,"
                     + "amount REAL NOT NULL,"
                     + "status TEXT NOT NULL DEFAULT 'UNPAID',"
                     + "issued_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,"
@@ -73,6 +75,8 @@ public final class DatabaseInitializer {
                     + "notes TEXT,"
                     + "FOREIGN KEY(car_id) REFERENCES cars(id),"
                     + "FOREIGN KEY(booking_id) REFERENCES bookings(id))");
+            addColumnIfMissing(connection, "bills", "daily_rate", "REAL NOT NULL DEFAULT 0");
+            addColumnIfMissing(connection, "bills", "billed_days", "INTEGER NOT NULL DEFAULT 1");
             seed(connection);
         } catch (SQLException exception) {
             throw new IllegalStateException("Database initialization failed: " + exception.getMessage(), exception);
@@ -153,7 +157,7 @@ public final class DatabaseInitializer {
     }
 
     private static void insertCar(Connection connection, String reg, String owner, String model, String carType,
-            String color, String status) throws SQLException {
+                                  String color, String status) throws SQLException {
         if (!exists(connection, "cars", "registration_no", reg)) {
             try (PreparedStatement statement = connection.prepareStatement(
                     "INSERT INTO cars(registration_no, owner_name, model, car_type, color, status) VALUES (?, ?, ?, ?, ?, ?)")) {
@@ -215,7 +219,7 @@ public final class DatabaseInitializer {
 
     private static int countRows(Connection connection, String table) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) AS total FROM " + table);
-                ResultSet resultSet = statement.executeQuery()) {
+             ResultSet resultSet = statement.executeQuery()) {
             return resultSet.next() ? resultSet.getInt("total") : 0;
         }
     }
