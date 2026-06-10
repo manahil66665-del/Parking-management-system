@@ -5,7 +5,7 @@ public class Bill {
     private String invoiceNo;
     private Car car;
     private double dailyRate;
-    private int billedDays;
+    private int BilledDays;
     private double amount;
     private String status;
     private String issuedAt;
@@ -23,7 +23,7 @@ public class Bill {
         this.invoiceNo = invoiceNo;
         this.car = car;
         this.dailyRate = dailyRate;
-        this.billedDays = billedDays;
+        this.BilledDays = billedDays;
         this.amount = amount;
         this.status = status;
         this.issuedAt = issuedAt;
@@ -48,7 +48,7 @@ public class Bill {
     }
 
     public int getBilledDays() {
-        return billedDays;
+        return BilledDays;
     }
 
     public double getAmount() {
