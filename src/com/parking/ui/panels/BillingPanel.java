@@ -3,7 +3,7 @@ package com.parking.ui.panels;
 import com.parking.model.Bill;
 import com.parking.model.Car;
 import com.parking.service.BillingService;
-import com.parking.service.CarService;
+import com.parking.service.CarsService;
 import com.parking.ui.Theme;
 
 import javax.swing.JButton;
@@ -23,7 +23,7 @@ import java.util.List;
 
 public class BillingPanel extends JPanel {
     private final BillingService billingService = new BillingService();
-    private final CarService carService = new CarService();
+    private final CarsService carService = new CarsService();
     private final DefaultTableModel model = new DefaultTableModel(
             new Object[] { "ID", "Invoice", "Registration", "Owner", "Type", "Rate/Day", "Days", "Amount", "Status",
                     "Issued", "Paid", "Notes" }, 0) {

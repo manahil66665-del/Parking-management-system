@@ -6,7 +6,8 @@ import com.parking.ui.LoginFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-public class Main {
+public class
+Main {
     public static void main(String[] args) {
         DatabaseInitializer.initialize();
         SwingUtilities.invokeLater(() -> {

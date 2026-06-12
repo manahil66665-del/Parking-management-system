@@ -2,7 +2,7 @@ package com.parking.ui.panels;
 
 import com.parking.model.Car;
 import com.parking.model.Slot;
-import com.parking.service.CarService;
+import com.parking.service.CarsService;
 import com.parking.service.SlotService;
 import com.parking.ui.Theme;
 
@@ -26,7 +26,7 @@ import java.util.List;
 
 public class SlotsPanel extends JPanel {
     private final SlotService slotService = new SlotService();
-    private final CarService carService = new CarService();
+    private final CarsService carService = new CarsService();
     private final DefaultTableModel model = new DefaultTableModel(
             new Object[] { "ID", "Slot", "Floor", "Slot Type", "Status", "Car Type", "Assigned Car" }, 0) {
         @Override

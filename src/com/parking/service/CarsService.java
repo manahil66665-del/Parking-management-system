@@ -7,7 +7,7 @@ import com.parking.util.ValidationUtil;
 import java.util.List;
 import java.util.Optional;
 
-public class CarService {
+public class CarsService {
     private final CarDao carDao = new CarDao();
     private final SlotService slotService = new SlotService();
 

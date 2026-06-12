@@ -3,7 +3,7 @@ package com.parking.ui.panels;
 import com.parking.model.Car;
 import com.parking.model.User;
 import com.parking.service.AccessControlService;
-import com.parking.service.CarService;
+import com.parking.service.CarsService;
 import com.parking.ui.Theme;
 
 import javax.swing.JButton;
@@ -21,7 +21,7 @@ import java.awt.GridLayout;
 import java.util.Optional;
 
 public class CarInfoPanel extends JPanel {
-    private final CarService carService = new CarService();
+    private final CarsService carService = new CarsService();
     private final AccessControlService accessControlService = new AccessControlService();
     private final User currentUser;
     private final JTextField searchField = new JTextField(12);
