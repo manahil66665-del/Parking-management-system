@@ -5,7 +5,7 @@ public class User {
     private String username;
     private String passwordHash;
     private String fullName;
-    private Role role;
+    private Role rol;
     private boolean active;
 
     public User(int id, String username, String passwordHash, String fullName, Role role, boolean active) {
@@ -13,7 +13,7 @@ public class User {
         this.username = username;
         this.passwordHash = passwordHash;
         this.fullName = fullName;
-        this.role = role;
+        this.rol = rol;
         this.active = active;
     }
 
@@ -34,7 +34,7 @@ public class User {
     }
 
     public Role getRole() {
-        return role;
+        return rol;
     }
 
     public boolean isActive() {
